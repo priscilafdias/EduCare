@@ -7,12 +7,51 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f4f4;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background-color: #f0f4f4;
+            transition: background-color 0.3s;
         }
+        body.theme-pink { background-color: #ffe4f0; }
+        body.theme-blue { background-color: #ddeeff; }
+
+        .accessibility-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #007a7a;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .accessibility-bar span {
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .theme-btn {
+            padding: 5px 14px;
+            border: 2px solid white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            background: transparent;
+            color: white;
+            transition: all 0.2s;
+        }
+        .theme-btn:hover { background: rgba(255,255,255,0.2); }
+        .theme-btn.active { background: white; color: #007a7a; }
+        .theme-btn.pink { border-color: #ff80b5; }
+        .theme-btn.pink.active { background: #ff80b5; color: white; border-color: #ff80b5; }
+        .theme-btn.blue { border-color: #80b5ff; }
+        .theme-btn.blue.active { background: #80b5ff; color: white; border-color: #80b5ff; }
+
         .login-box {
             background: white;
             padding: 40px;
@@ -20,9 +59,26 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 400px;
+            margin-top: 50px;
         }
-        h1 { color: #007a7a; text-align: center; margin-bottom: 8px; }
-        p.subtitle { text-align: center; color: #888; margin-bottom: 24px; }
+        .logo { text-align: center; margin-bottom: 8px; }
+        .logo h1 { color: #007a7a; font-size: 32px; }
+        .logo p { color: #888; font-size: 13px; margin-bottom: 24px; }
+        .send-badges {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .autism { background: #e3f2fd; color: #1565c0; }
+        .adhd { background: #fff3e0; color: #e65100; }
+        .dyslexia { background: #f3e5f5; color: #6a1b9a; }
         input {
             width: 100%;
             padding: 12px;
@@ -31,7 +87,8 @@
             border-radius: 8px;
             font-size: 14px;
         }
-        button {
+        input:focus { outline: none; border-color: #007a7a; }
+        button[type=submit] {
             width: 100%;
             padding: 12px;
             background-color: #007a7a;
@@ -40,15 +97,30 @@
             border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
+            font-weight: bold;
         }
-        button:hover { background-color: #005f5f; }
-        .flash { color: red; text-align: center; margin-bottom: 12px; font-size: 14px; }
+        button[type=submit]:hover { background-color: #005f5f; }
+        .flash { color: #c62828; text-align: center; margin-bottom: 12px; font-size: 14px; background: #ffebee; padding: 8px; border-radius: 8px; }
     </style>
 </head>
-<body>
+<body id="loginBody">
+    <div class="accessibility-bar">
+        <span>👁 Accessibility:</span>
+        <button class="theme-btn active" id="btnDefault" onclick="setTheme('default')">Default</button>
+        <button class="theme-btn pink" id="btnPink" onclick="setTheme('pink')">🩷 Pink</button>
+        <button class="theme-btn blue" id="btnBlue" onclick="setTheme('blue')">💙 Blue</button>
+    </div>
+
     <div class="login-box">
-        <h1>EduCare</h1>
-        <p class="subtitle">Supporting students with SEND</p>
+        <div class="logo">
+            <h1>EduCare</h1>
+            <p>Supporting students with SEND</p>
+        </div>
+        <div class="send-badges">
+            <span class="badge autism">Autism</span>
+            <span class="badge adhd">ADHD</span>
+            <span class="badge dyslexia">Dyslexia</span>
+        </div>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, message in messages %}
                 <p class="flash">{{ message }}</p>
@@ -60,5 +132,19 @@
             <button type="submit">Login</button>
         </form>
     </div>
+
+    <script>
+        function setTheme(theme) {
+            const body = document.getElementById('loginBody');
+            body.className = theme === 'default' ? '' : 'theme-' + theme;
+            document.getElementById('btnDefault').className = 'theme-btn' + (theme === 'default' ? ' active' : '');
+            document.getElementById('btnPink').className = 'theme-btn pink' + (theme === 'pink' ? ' active' : '');
+            document.getElementById('btnBlue').className = 'theme-btn blue' + (theme === 'blue' ? ' active' : '');
+            localStorage.setItem('educare-theme', theme);
+        }
+
+        const saved = localStorage.getItem('educare-theme');
+        if (saved) setTheme(saved);
+    </script>
 </body>
 </html>
