@@ -1,3 +1,5 @@
+from flask_mail import Message
+from app import mail
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db, bcrypt
@@ -150,3 +152,60 @@ def link_user():
         flash(f'{user.username} linked successfully!', 'success')
         return redirect(url_for('main.link_user'))
     return render_template('link_user.html', users=users, students=students)
+
+@main.route('/students/<int:id>/report', methods=['GET', 'POST'])
+@login_required
+@staff_required
+def student_report(id):
+    student = Student.query.get_or_404(id)
+    updates = CommunicationUpdate.query.filter_by(
+        student_id=id
+    ).order_by(CommunicationUpdate.created_at.desc()).all()
+    
+    mood_counts = {}
+    for update in updates:
+        if update.mood:
+            mood = update.mood
+            mood_counts[mood] = mood_counts.get(mood, 0) + 1
+    
+    alert_counts = {
+        'Normal': sum(1 for u in updates if u.alert_level == 'Normal'),
+        'Needs Attention': sum(1 for u in updates if u.alert_level == 'Needs Attention'),
+        'Urgent': sum(1 for u in updates if u.alert_level == 'Urgent'),
+    }
+
+    if request.method == 'POST':
+        recipient = request.form.get('email')
+        report_text = f"""
+EduCare Progress Report
+=======================
+Student: {student.full_name}
+Year Group: {student.year_group}
+SEND Need: {student.send_need}
+EHCP: {'Yes' if student.ehcp else 'No'}
+
+Total Updates: {len(updates)}
+Urgent Alerts: {alert_counts['Urgent']}
+Needs Attention: {alert_counts['Needs Attention']}
+
+Recent Updates:
+"""
+        for update in updates[:5]:
+            report_text += f"""
+- [{update.author_role.upper()}] {update.update_type}
+  {update.message}
+  {update.created_at.strftime('%d %b %Y, %H:%M')}
+"""
+        try:
+            msg = Message(
+                subject=f'EduCare Report - {student.full_name}',
+                recipients=[recipient],
+                body=report_text
+            )
+            mail.send(msg)
+            flash('Report sent successfully!', 'success')
+        except Exception as e:
+            flash('Error sending email. Please check the address.', 'danger')
+        return redirect(url_for('main.student_report', id=id))
+
+    return render_template('report.html', student=student, updates=updates, mood_counts=mood_counts, alert_counts=alert_counts)

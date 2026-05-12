@@ -153,7 +153,10 @@
 
         <div class="board-header">
             <h3>📋 Communication Board</h3>
-            <a href="/students/{{ student.id }}/update" class="btn">+ Add Update</a>
+            <div style="display:flex; gap:8px;">
+                <a href="/students/{{ student.id }}/update" class="btn">+ Add Update</a>
+                <a href="/students/{{ student.id }}/report" class="btn" style="background-color:#007a7a; color:white;">📊 Report</a>
+            </div>
         </div>
 
         {% if updates %}
