@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from app import db, bcrypt
 from app.models import User, Student, CommunicationUpdate
 from datetime import datetime
+from functools import wraps
 
 auth = Blueprint('auth', __name__)
 main = Blueprint('main', __name__)
@@ -16,6 +17,15 @@ MOODS = [
     ('😰', 'Anxious'),
     ('😒', 'Not in the mood')
 ]
+
+def staff_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.role not in ['teacher', 'ta']:
+            flash('Access restricted to staff only.', 'danger')
+            return redirect(url_for('main.dashboard'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -39,18 +49,25 @@ def logout():
 @main.route('/')
 @login_required
 def dashboard():
-    students = Student.query.all()
     updates = CommunicationUpdate.query.order_by(CommunicationUpdate.created_at.desc()).limit(5).all()
+    if current_user.role in ['teacher', 'ta']:
+        students = Student.query.all()
+    elif current_user.role in ['parent', 'student']:
+        students = [current_user.linked_student] if current_user.linked_student else []
+    else:
+        students = []
     return render_template('dashboard.html', students=students, updates=updates)
 
 @main.route('/students')
 @login_required
+@staff_required
 def students():
     students = Student.query.all()
     return render_template('students.html', students=students)
 
 @main.route('/students/add', methods=['GET', 'POST'])
 @login_required
+@staff_required
 def add_student():
     if request.method == 'POST':
         student = Student(
@@ -71,6 +88,10 @@ def add_student():
 @login_required
 def student_profile(id):
     student = Student.query.get_or_404(id)
+    if current_user.role in ['parent', 'student']:
+        if not current_user.linked_student or current_user.linked_student.id != id:
+            flash('Access restricted.', 'danger')
+            return redirect(url_for('main.dashboard'))
     updates = CommunicationUpdate.query.filter_by(student_id=id).order_by(CommunicationUpdate.created_at.desc()).all()
     return render_template('student_profile.html', student=student, updates=updates)
 
@@ -78,6 +99,10 @@ def student_profile(id):
 @login_required
 def add_update(id):
     student = Student.query.get_or_404(id)
+    if current_user.role in ['parent', 'student']:
+        if not current_user.linked_student or current_user.linked_student.id != id:
+            flash('Access restricted.', 'danger')
+            return redirect(url_for('main.dashboard'))
     if request.method == 'POST':
         update = CommunicationUpdate(
             student_id=id,
@@ -97,5 +122,31 @@ def add_update(id):
 @main.route('/board')
 @login_required
 def board():
-    updates = CommunicationUpdate.query.order_by(CommunicationUpdate.created_at.desc()).all()
+    if current_user.role in ['teacher', 'ta']:
+        updates = CommunicationUpdate.query.order_by(CommunicationUpdate.created_at.desc()).all()
+    elif current_user.role in ['parent', 'student']:
+        if current_user.linked_student:
+            updates = CommunicationUpdate.query.filter_by(
+                student_id=current_user.linked_student.id
+            ).order_by(CommunicationUpdate.created_at.desc()).all()
+        else:
+            updates = []
+    else:
+        updates = []
     return render_template('board.html', updates=updates)
+
+@main.route('/admin/link', methods=['GET', 'POST'])
+@login_required
+@staff_required
+def link_user():
+    users = User.query.filter(User.role.in_(['parent', 'student'])).all()
+    students = Student.query.all()
+    if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        student_id = request.form.get('student_id')
+        user = User.query.get(user_id)
+        user.student_id = student_id
+        db.session.commit()
+        flash(f'{user.username} linked successfully!', 'success')
+        return redirect(url_for('main.link_user'))
+    return render_template('link_user.html', users=users, students=students)

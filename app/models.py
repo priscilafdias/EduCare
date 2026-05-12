@@ -7,6 +7,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=True)
+    linked_student = db.relationship('Student', foreign_keys=[student_id])
 
     def __repr__(self):
         return f'<User {self.username}>'
