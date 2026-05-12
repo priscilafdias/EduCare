@@ -106,17 +106,22 @@
             <p>Communication board</p>
         </a>
         {% if current_user.role == 'student' %}
-        <a href="/board" class="card">
+        <a href="/students/{{ current_user.linked_student.id }}/update" class="card">
             <div class="icon">😊</div>
             <h3>My Mood</h3>
             <p>Share how you feel today</p>
         </a>
         {% endif %}
         {% if current_user.role == 'parent' %}
-        <a href="/board" class="card">
+        <a href="/students/{{ current_user.linked_student.id }}/update" class="card">
             <div class="icon">📢</div>
             <h3>Send Alert</h3>
             <p>Notify school about your child</p>
+        </a>
+        <a href="/students/{{ current_user.linked_student.id }}" class="card">
+            <div class="icon">👀</div>
+            <h3>My Child</h3>
+            <p>View profile & updates</p>
         </a>
         {% endif %}
     </div>
