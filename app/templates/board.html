@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduCare - Communication Board</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f0f4f4; }
+        .navbar {
+            background-color: #007a7a;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 { color: white; font-size: 22px; }
+        .navbar a { color: #ffc107; text-decoration: none; font-weight: bold; margin-left: 16px; }
+        .container { padding: 40px 32px; max-width: 800px; margin: 0 auto; }
+        h2 { color: #007a7a; margin-bottom: 24px; }
+        .update-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border-left: 5px solid #007a7a;
+        }
+        .update-card.urgent { border-left-color: #c62828; }
+        .update-card.attention { border-left-color: #e65100; }
+        .update-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .update-header .left { display: flex; align-items: center; gap: 10px; }
+        .role-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .teacher { background: #e3f2fd; color: #1565c0; }
+        .ta { background: #f3e5f5; color: #6a1b9a; }
+        .parent { background: #fff3e0; color: #e65100; }
+        .student { background: #e8f5e9; color: #2e7d32; }
+        .student-name { font-weight: bold; color: #007a7a; }
+        .update-type { font-size: 13px; color: #888; }
+        .mood { font-size: 20px; }
+        .message { color: #333; line-height: 1.6; margin-top: 8px; }
+        .timestamp { font-size: 12px; color: #aaa; margin-top: 8px; }
+        .alert-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .Normal { background: #e8f5e9; color: #2e7d32; }
+        .Urgent { background: #ffebee; color: #c62828; }
+        .Needs-Attention { background: #fff3e0; color: #e65100; }
+        .no-updates { text-align: center; padding: 60px; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>EduCare</h1>
+        <div>
+            <a href="/">Dashboard</a>
+            <a href="/students">Students</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        <h2>📋 Communication Board</h2>
+        {% if updates %}
+            {% for update in updates %}
+            <div class="update-card {{ 'urgent' if update.alert_level == 'Urgent' else 'attention' if update.alert_level == 'Needs Attention' else '' }}">
+                <div class="update-header">
+                    <div class="left">
+                        <span class="role-badge {{ update.author_role }}">{{ update.author_role | upper }}</span>
+                        <span class="student-name">{{ update.student.full_name }}</span>
+                        <span class="update-type">— {{ update.update_type }}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        {% if update.mood %}
+                            <span class="mood">{{ update.mood.split()[0] }}</span>
+                        {% endif %}
+                        <span class="alert-badge {{ update.alert_level.replace(' ', '-') }}">{{ update.alert_level }}</span>
+                    </div>
+                </div>
+                <p class="message">{{ update.message }}</p>
+                <p class="timestamp">{{ update.created_at.strftime('%d %b %Y, %H:%M') }} — by {{ update.author.username }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-updates">No updates yet. Be the first to post! 💬</p>
+        {% endif %}
+    </div>
+</body>
+</html>

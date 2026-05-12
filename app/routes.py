@@ -1,10 +1,21 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db, bcrypt
-from app.models import User, Student
+from app.models import User, Student, CommunicationUpdate
+from datetime import datetime
 
 auth = Blueprint('auth', __name__)
 main = Blueprint('main', __name__)
+
+MOODS = [
+    ('😄', 'Happy'),
+    ('😴', 'Tired'),
+    ('😠', 'Angry'),
+    ('😪', 'Sleepy'),
+    ('🤫', 'Quiet'),
+    ('😰', 'Anxious'),
+    ('😒', 'Not in the mood')
+]
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -29,7 +40,8 @@ def logout():
 @login_required
 def dashboard():
     students = Student.query.all()
-    return render_template('dashboard.html', students=students)
+    updates = CommunicationUpdate.query.order_by(CommunicationUpdate.created_at.desc()).limit(5).all()
+    return render_template('dashboard.html', students=students, updates=updates)
 
 @main.route('/students')
 @login_required
@@ -59,4 +71,31 @@ def add_student():
 @login_required
 def student_profile(id):
     student = Student.query.get_or_404(id)
-    return render_template('student_profile.html', student=student)
+    updates = CommunicationUpdate.query.filter_by(student_id=id).order_by(CommunicationUpdate.created_at.desc()).all()
+    return render_template('student_profile.html', student=student, updates=updates)
+
+@main.route('/students/<int:id>/update', methods=['GET', 'POST'])
+@login_required
+def add_update(id):
+    student = Student.query.get_or_404(id)
+    if request.method == 'POST':
+        update = CommunicationUpdate(
+            student_id=id,
+            author_id=current_user.id,
+            author_role=current_user.role,
+            update_type=request.form.get('update_type'),
+            mood=request.form.get('mood'),
+            message=request.form.get('message'),
+            alert_level=request.form.get('alert_level')
+        )
+        db.session.add(update)
+        db.session.commit()
+        flash('Update posted!', 'success')
+        return redirect(url_for('main.student_profile', id=id))
+    return render_template('add_update.html', student=student, moods=MOODS)
+
+@main.route('/board')
+@login_required
+def board():
+    updates = CommunicationUpdate.query.order_by(CommunicationUpdate.created_at.desc()).all()
+    return render_template('board.html', updates=updates)

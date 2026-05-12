@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduCare - Add Update</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f0f4f4; }
+        .navbar {
+            background-color: #007a7a;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 { color: white; font-size: 22px; }
+        .navbar a { color: #ffc107; text-decoration: none; font-weight: bold; margin-left: 16px; }
+        .container { padding: 40px 32px; max-width: 600px; margin: 0 auto; }
+        h2 { color: #007a7a; margin-bottom: 8px; }
+        .subtitle { color: #888; margin-bottom: 24px; font-size: 14px; }
+        .card { background: white; padding: 32px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 6px; color: #555; font-weight: bold; font-size: 14px; }
+        select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        textarea { height: 120px; resize: vertical; }
+        .mood-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .mood-option input { display: none; }
+        .mood-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #555;
+            transition: all 0.2s;
+        }
+        .mood-option label span.emoji { font-size: 28px; margin-bottom: 4px; }
+        .mood-option input:checked + label {
+            border-color: #007a7a;
+            background-color: #e8f5f5;
+            color: #007a7a;
+            font-weight: bold;
+        }
+        .alert-grid {
+            display: flex;
+            gap: 10px;
+        }
+        .alert-option input { display: none; }
+        .alert-option label {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .alert-option.normal input:checked + label { border-color: #2e7d32; background: #e8f5e9; color: #2e7d32; }
+        .alert-option.attention input:checked + label { border-color: #e65100; background: #fff3e0; color: #e65100; }
+        .alert-option.urgent input:checked + label { border-color: #c62828; background: #ffebee; color: #c62828; }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #007a7a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover { background-color: #005f5f; }
+        .back-btn { display: inline-block; margin-bottom: 20px; color: #007a7a; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>EduCare</h1>
+        <div>
+            <a href="/students/{{ student.id }}">Back to Profile</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        <a href="/students/{{ student.id }}" class="back-btn">← Back</a>
+        <h2>Add Update</h2>
+        <p class="subtitle">Communication Board for {{ student.full_name }}</p>
+        <div class="card">
+            <form method="POST">
+                <div class="form-group">
+                    <label>Update Type</label>
+                    <select name="update_type" required>
+                        <option value="How I'd like to be approached today">🧠 How I'd like to be approached today</option>
+                        <option value="How was my night/yesterday">🌙 How was my night/yesterday</option>
+                        <option value="Alert before school">🚨 Alert before school</option>
+                        <option value="Learning update">📚 Learning update</option>
+                        <option value="Social progress">🤝 Social progress</option>
+                        <option value="How was the day today">🌅 How was the day today</option>
+                        <option value="General update">💬 General update</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mood Today</label>
+                    <div class="mood-grid">
+                        {% for emoji, mood in moods %}
+                        <div class="mood-option">
+                            <input type="radio" name="mood" id="mood_{{ loop.index }}" value="{{ emoji }} {{ mood }}">
+                            <label for="mood_{{ loop.index }}">
+                                <span class="emoji">{{ emoji }}</span>
+                                {{ mood }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Alert Level</label>
+                    <div class="alert-grid">
+                        <div class="alert-option normal">
+                            <input type="radio" name="alert_level" id="normal" value="Normal" checked>
+                            <label for="normal">🟢 Normal</label>
+                        </div>
+                        <div class="alert-option attention">
+                            <input type="radio" name="alert_level" id="attention" value="Needs Attention">
+                            <label for="attention">🟡 Needs Attention</label>
+                        </div>
+                        <div class="alert-option urgent">
+                            <input type="radio" name="alert_level" id="urgent" value="Urgent">
+                            <label for="urgent">🔴 Urgent</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea name="message" placeholder="Write your update here..." required></textarea>
+                </div>
+                <button type="submit" class="btn">Post Update</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
