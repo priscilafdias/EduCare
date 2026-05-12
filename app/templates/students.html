@@ -1,114 +1,106 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>EduCare - Students</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background-color: #f0f4f4; }
-        .navbar {
-            background-color: #007a7a;
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .navbar h1 { color: white; font-size: 22px; }
-        .navbar a { color: #ffc107; text-decoration: none; font-weight: bold; margin-left: 16px; }
-        .container { padding: 40px 32px; }
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        .header-row h2 { color: #007a7a; }
-        .btn {
-            background-color: #ffc107;
-            color: #333;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        table {
-            width: 100%;
-            background: white;
-            border-radius: 12px;
-            border-collapse: collapse;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-        th {
-            background-color: #007a7a;
-            color: white;
-            padding: 14px 16px;
-            text-align: left;
-        }
-        td { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
-        tr:hover { background-color: #f9f9f9; }
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .autism { background-color: #e3f2fd; color: #1565c0; }
-        .adhd { background-color: #fff3e0; color: #e65100; }
-        .dyslexia { background-color: #f3e5f5; color: #6a1b9a; }
-        .ehcp-yes { background-color: #e8f5e9; color: #2e7d32; }
-        .no-students { text-align: center; padding: 40px; color: #888; }
-    </style>
-</head>
-<body>
-    <div class="navbar">
-        <h1>EduCare</h1>
-        <div>
-            <a href="/">Dashboard</a>
-            <a href="/logout">Logout</a>
-        </div>
+{% extends "base.html" %}
+
+{% block title %}EduCare - Students{% endblock %}
+
+{% block extra_css %}
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background-color: #f0f4f4; }
+    .navbar {
+        background-color: #007a7a;
+        padding: 16px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 36px;
+    }
+    .navbar h1 { color: white; font-size: 22px; }
+    .navbar a { color: #ffc107; text-decoration: none; font-weight: bold; margin-left: 16px; }
+    .container { padding: 40px 32px; }
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    .header-row h2 { color: #007a7a; }
+    .btn {
+        background-color: #ffc107;
+        color: #333;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    table {
+        width: 100%;
+        background: white;
+        border-radius: 12px;
+        border-collapse: collapse;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    th {
+        background-color: #007a7a;
+        color: white;
+        padding: 14px 16px;
+        text-align: left;
+    }
+    td { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+    tr:hover { background-color: #f9f9f9; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+    .autism { background-color: #e3f2fd; color: #1565c0; }
+    .adhd { background-color: #fff3e0; color: #e65100; }
+    .dyslexia { background-color: #f3e5f5; color: #6a1b9a; }
+    .ehcp-yes { background-color: #e8f5e9; color: #2e7d32; }
+    .no-students { text-align: center; padding: 40px; color: #888; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="navbar">
+    <h1>EduCare</h1>
+    <div>
+        <a href="/">Dashboard</a>
+        <a href="/logout">Logout</a>
     </div>
-    <div class="container">
-        <div class="header-row">
-            <h2>Students with SEND</h2>
-            <a href="/students/add" class="btn">+ Add Student</a>
-        </div>
-        <table>
-            <thead>
+</div>
+<div class="container">
+    <div class="header-row">
+        <h2>Students with SEND</h2>
+        <a href="/students/add" class="btn">+ Add Student</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Year Group</th>
+                <th>SEND Need</th>
+                <th>EHCP</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if students %}
+                {% for student in students %}
                 <tr>
-                    <th>Name</th>
-                    <th>Year Group</th>
-                    <th>SEND Need</th>
-                    <th>EHCP</th>
-                    <th>Action</th>
+                    <td>{{ student.full_name }}</td>
+                    <td>{{ student.year_group }}</td>
+                    <td><span class="badge {{ student.send_need | lower }}">{{ student.send_need }}</span></td>
+                    <td>
+                        {% if student.ehcp %}
+                            <span class="badge ehcp-yes">Yes</span>
+                        {% else %}
+                            No
+                        {% endif %}
+                    </td>
+                    <td><a href="/students/{{ student.id }}">View Profile</a></td>
                 </tr>
-            </thead>
-            <tbody>
-                {% if students %}
-                    {% for student in students %}
-                    <tr>
-                        <td>{{ student.full_name }}</td>
-                        <td>{{ student.year_group }}</td>
-                        <td>
-                            <span class="badge {{ student.send_need | lower }}">
-                                {{ student.send_need }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if student.ehcp %}
-                                <span class="badge ehcp-yes">Yes</span>
-                            {% else %}
-                                No
-                            {% endif %}
-                        </td>
-                        <td><a href="/students/{{ student.id }}">View Profile</a></td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr><td colspan="5" class="no-students">No students added yet.</td></tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
+                {% endfor %}
+            {% else %}
+                <tr><td colspan="5" class="no-students">No students added yet.</td></tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
