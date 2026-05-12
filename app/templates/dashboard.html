@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduCare - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f0f4f4; }
+        .navbar {
+            background-color: #007a7a;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 { color: white; font-size: 22px; }
+        .navbar a { color: #ffc107; text-decoration: none; font-weight: bold; }
+        .container { padding: 40px 32px; }
+        .welcome { font-size: 24px; color: #007a7a; margin-bottom: 8px; }
+        .role { color: #888; font-size: 14px; margin-bottom: 32px; }
+        .cards { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 200px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .card h3 { color: #007a7a; margin-bottom: 8px; }
+        .card p { color: #888; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>EduCare</h1>
+        <a href="/logout">Logout</a>
+    </div>
+    <div class="container">
+        <p class="welcome">Welcome, {{ current_user.username }}!</p>
+        <p class="role">Role: {{ current_user.role }}</p>
+        <div class="cards">
+            <div class="card">
+                <h3>Students</h3>
+                <p>View student profiles</p>
+            </div>
+            <div class="card">
+                <h3>Updates</h3>
+                <p>Daily progress updates</p>
+            </div>
+            <div class="card">
+                <h3>Messages</h3>
+                <p>Communication hub</p>
+            </div>
+            <div class="card">
+                <h3>EHCPs</h3>
+                <p>Education Health Care Plans</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
